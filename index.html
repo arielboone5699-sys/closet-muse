@@ -203,5 +203,114 @@ renderCloset();renderSaved();renderWeek();renderSuggestions();renderDaily();
 
   console.log('Closet Muse database connected!');
 </script>
+
+<!-- CLOSET MUSE ACCOUNT LOGIN -->
+<div id="closet-muse-account" style="max-width:420px;margin:35px auto;padding:28px;background:#f8f5ef;border:1px solid #ded5c8;border-radius:12px;color:#40372f;font-family:Arial,sans-serif;">
+  <h2 style="font-family:Georgia,serif;text-align:center;">Your Closet Muse Account</h2>
+  <p style="text-align:center;">Sign in or create your free account.</p>
+
+  <label for="cm-email">Email address</label>
+  <input id="cm-email" type="email" placeholder="you@example.com" style="box-sizing:border-box;width:100%;padding:12px;margin:8px 0 16px;">
+
+  <label for="cm-password">Password</label>
+  <input id="cm-password" type="password" placeholder="At least 6 characters" style="box-sizing:border-box;width:100%;padding:12px;margin:8px 0 16px;">
+
+  <button id="cm-signup" type="button" style="width:100%;padding:12px;background:#514437;color:white;border:0;margin-bottom:10px;cursor:pointer;">Create Account</button>
+
+  <button id="cm-login" type="button" style="width:100%;padding:12px;background:#ded5c8;color:#40372f;border:0;cursor:pointer;">Log In</button>
+
+  <button id="cm-logout" type="button" style="display:none;width:100%;padding:12px;margin-top:10px;cursor:pointer;">Log Out</button>
+
+  <p id="cm-auth-message" style="text-align:center;margin-top:16px;"></p>
+</div>
+
+<script>
+(function () {
+  const email = document.getElementById('cm-email');
+  const password = document.getElementById('cm-password');
+  const message = document.getElementById('cm-auth-message');
+  const signup = document.getElementById('cm-signup');
+  const login = document.getElementById('cm-login');
+  const logout = document.getElementById('cm-logout');
+
+  function showMessage(text) {
+    message.textContent = text;
+  }
+
+  function updateAccount(user) {
+    if (user) {
+      showMessage('You are signed in as ' + user.email);
+      signup.style.display = 'none';
+      login.style.display = 'none';
+      logout.style.display = 'block';
+    } else {
+      showMessage('Please sign in or create an account.');
+      signup.style.display = 'block';
+      login.style.display = 'block';
+      logout.style.display = 'none';
+    }
+  }
+
+  signup.addEventListener('click', async function () {
+    if (!email.value || !password.value) {
+      showMessage('Please enter your email and password.');
+      return;
+    }
+
+    showMessage('Creating your account...');
+
+    const { data, error } = await closetMuseDB.auth.signUp({
+      email: email.value.trim(),
+      password: password.value
+    });
+
+    if (error) {
+      showMessage(error.message);
+    } else if (data.session) {
+      updateAccount(data.user);
+    } else {
+      showMessage('Account created! Check your email to confirm your account, then log in.');
+    }
+  });
+
+  login.addEventListener('click', async function () {
+    if (!email.value || !password.value) {
+      showMessage('Please enter your email and password.');
+      return;
+    }
+
+    showMessage('Signing in...');
+
+    const { data, error } = await closetMuseDB.auth.signInWithPassword({
+      email: email.value.trim(),
+      password: password.value
+    });
+
+    if (error) {
+      showMessage(error.message);
+    } else {
+      updateAccount(data.user);
+    }
+  });
+
+  logout.addEventListener('click', async function () {
+    const { error } = await closetMuseDB.auth.signOut();
+    if (error) {
+      showMessage(error.message);
+    } else {
+      updateAccount(null);
+    }
+  });
+
+  closetMuseDB.auth.getSession().then(function ({ data }) {
+    updateAccount(data.session ? data.session.user : null);
+  });
+
+  closetMuseDB.auth.onAuthStateChange(function (_event, session) {
+    updateAccount(session ? session.user : null);
+  });
+})();
+</script>
+
 </body>
 </html>
