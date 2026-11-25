@@ -187,5 +187,21 @@ function planDay(d){let choices=outfits.map(o=>o.occasion+' look');let val=promp
 $('fillWeek').onclick=()=>{if(!outfits.length){toast('Save an outfit first, then plan your week.');return}days.forEach((d,i)=>week[d]=outfits[i%outfits.length].occasion+' look');persist();renderWeek();toast('Your week has been filled in')}
 renderCloset();renderSaved();renderWeek();renderSuggestions();renderDaily();
 </script>
+
+<!-- CLOSET MUSE SUPABASE CONNECTION -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  const SUPABASE_URL = 'https://uwrlwbmmkcmugywzyolt.supabase.co';
+
+  const SUPABASE_ANON_KEY = 'sb_publishable_oiLJ-6UqCefapKkvgvq65A_rZJCtvQe';
+
+  const closetMuseDB = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
+
+  console.log('Closet Muse database connected!');
+</script>
 </body>
 </html>
